@@ -1,0 +1,10 @@
+name: 'Comiler Actions'
+description: 'Compile JSX to JS and HTML'
+inputs:
+  token:
+    description: 'GitHub token for pushing changes.'
+    required: true
+runs:
+  using: 'node12'
+  pre: 'install.js'
+  main: 'index.js'
