@@ -28,11 +28,11 @@ console.time('transform');
   const files = await globber.glob()
   
   const renderFile = `
-import(import.meta.url
+import(\`./\${import.meta.url
   .split('?')[1]
   .split('&')
   .map(p => p.split('='))
-  .find(([p]) => p === 'component')[1]
+  .find(([p]) => p === 'component')[1]}\`
 ).then(({ default: App }) => {
   const app = React.createElement(App)
   const appDiv = document.getElementById('app')
