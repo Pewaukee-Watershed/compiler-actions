@@ -28,7 +28,7 @@ console.time('transform');
   const files = await globber.glob()
   
   const renderFile = `
-import(window.location.pathname
+import(import.meta.url
   .split('?')[1]
   .split('&')
   .map(p => p.split('='))
