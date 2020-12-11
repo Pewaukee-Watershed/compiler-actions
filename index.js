@@ -51,7 +51,7 @@ ReactDOM.render(app, appDiv)
       presets: [reactPreset]
     })
     await fs.writeFile(jsFile, `const React = require('react')\n${requireCode}`)
-    const { default: App } = await import(jsFile)
+    const { default: App } = require(jsFile)
     const app = React.createElement(App)
     const html = `
 <!DOCTYPE html>
