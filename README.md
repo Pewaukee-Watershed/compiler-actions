@@ -6,6 +6,7 @@ Compile JSX to JS and HTML
 - Finds all `.jsx` files
   - Creates a `.js` file with the same name. Uses babel to compile this.
   - Creates a `.html` file with the same name. Uses react dom server rendering to do this.
+- Commits changes to the branch it was run on.
   
 ## Inputs
 - token: The repository `secrets.GITHUB_TOKEN`. Used to create commits.
