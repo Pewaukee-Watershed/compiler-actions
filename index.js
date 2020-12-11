@@ -20,6 +20,7 @@ console.time('transform');
   const octokit = github.getOctokit(core.getInput('token'))
   
   const reactPreset = babel.createConfigItem(require('@babel/preset-react'), { type: 'preset' })
+  const commonjsPlugin = babel.createConfigItem(require('@babel/plugin-transform-modules-commonjs'), { type: 'plugin' })
   
   const globber = await glob.create('**/*.jsx\n!**/node_modules')
   const files = await globber.glob()
@@ -45,7 +46,11 @@ ReactDOM.render(app, appDiv)
     const jsBlob = await createBlob(`const React = window.react\n${code}`)
     const jsFile = file.replace('.jsx', '.js')
     const jsPath = path.relative(process.cwd(), jsFile)
-    await fs.writeFile(jsFile, `import React from 'react'\n${code}`)
+    const { code: requireCode } = await babel.transformAsync(text, {
+      plugins: [commonjsPlugin],
+      presets: [reactPreset]
+    })
+    await fs.writeFile(jsFile, `const React = require('react')\n${requireCode}`)
     const { default: App } = await import(jsFile)
     const app = React.createElement(App)
     const html = `
