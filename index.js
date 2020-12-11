@@ -17,7 +17,7 @@ console.time('transform');
     encoding: 'utf-8'
   })
   
-  const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
+  const octokit = github.getOctokit(core.getInput('token'))
   
   const reactPreset = babel.createConfigItem('@babel/preset-react', { type: 'preset' })
   
