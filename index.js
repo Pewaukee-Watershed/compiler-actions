@@ -24,6 +24,19 @@ console.time('transform');
   const globber = await glob.create('**/*.jsx\n!**/node_modules')
   const files = await globber.glob()
   
+  const renderFile = `
+const { default: App } = await import(window.location.pathname
+  .split('?')[1]
+  .split('&')
+  .map(p => p.split('='))
+  .find(([p]) => p === 'component')[1]
+)
+const app = React.createElement(App)
+const appDiv = document.getElementById('app')
+ReactDOM.render(app, appDiv)
+`
+  const renderBlob = await createBlob(renderFile)
+  
   const blobs = await Promise.all(files.map(async file => {
     const text = await fs.readFile(file, 'utf8')
     const { code } = await babel.transformAsync(text, {
@@ -39,6 +52,8 @@ console.time('transform');
 <!DOCTYPE html>
 <html>
 <head>
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
   <script type="module" src="/render.js?component=${jsPath}"></script>
 </head>
 <body>
@@ -64,7 +79,11 @@ console.time('transform');
   const tree = await octokit.git.createTree({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tree: [].concat(...blobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
+    tree: [{
+      path: 'render.js',
+      sha: renderBlob.data.sha,
+      mode: '100644'
+    }].concat(...blobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
       path: file,
       sha: sha,
       mode: '100644'
