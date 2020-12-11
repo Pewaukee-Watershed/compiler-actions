@@ -66,9 +66,7 @@ import(\`./\${import.meta.url
   <script type="module" src="/render.js?component=${jsPath}"></script>
 </head>
 <body>
-  <div id="app">
-    ${ReactDOM.renderToString(app)}
-  </div>
+  <div id="app">${ReactDOM.renderToString(app)}</div>
 </body>
 </html>
 `
