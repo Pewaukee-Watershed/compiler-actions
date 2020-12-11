@@ -10,6 +10,8 @@ const path = require('path')
 console.log('Finding Files')
 console.time('transform');
 (async () => {
+  const reactPath = require.resolve('react')
+  
   const createBlob = async text => await octokit.git.createBlob({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
@@ -50,7 +52,8 @@ ReactDOM.render(app, appDiv)
       plugins: [commonjsPlugin],
       presets: [reactPreset]
     })
-    await fs.writeFile(jsFile, `const React = require('react')\n${requireCode}`)
+    const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
+    await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
     const app = React.createElement(App)
     const html = `
