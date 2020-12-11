@@ -36,7 +36,7 @@ import(\`./\${import.meta.url
 ).then(({ default: App }) => {
   const app = React.createElement(App)
   const appDiv = document.getElementById('app')
-  ReactDOM.render(app, appDiv)
+  ReactDOM.hydrate(app, appDiv)
 })
 `
   const renderBlob = await createBlob(renderFile)
