@@ -19,7 +19,7 @@ console.time('transform');
   
   const octokit = github.getOctokit(core.getInput('token'))
   
-  const reactPreset = babel.createConfigItem('@babel/preset-react', { type: 'preset' })
+  const reactPreset = babel.createConfigItem(require('@babel/preset-react'), { type: 'preset' })
   
   const globber = await glob.create('**/*.jsx\n!**/node_modules')
   const files = await globber.glob()
