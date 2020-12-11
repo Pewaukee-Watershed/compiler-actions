@@ -4,7 +4,7 @@ const github = require('@actions/github')
 const babel = require('@babel/core')
 const React = require('react')
 const ReactDOM = require('react-dom/server.js')
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const path = require('path')
 
 console.log('Finding Files')
