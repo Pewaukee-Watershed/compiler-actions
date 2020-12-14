@@ -44,14 +44,7 @@ import(\`./\${import.meta.url
   const blobs = await Promise.all(files.map(async file => {
     const text = await fs.readFile(file, 'utf8')
     const { code } = await babel.transformAsync(text, {
-      presets: [reactPreset]
-    })
-    const jsBlob = await createBlob(`const React = window.React\n${code}`)
-    const jsFile = file.replace('.jsx', '.js')
-    const jsPath = path.relative(process.cwd(), jsFile)
-    const cssSources = []
-    const { code: requireCode } = await babel.transformAsync(text, {
-      plugins: [commonjsPlugin, {
+      plugins: [{
         visitor: {
          ImportDeclaration(path){
            if(path.node.source.value.endsWith('.css')){
@@ -61,6 +54,22 @@ import(\`./\${import.meta.url
          }
         }
       }],
+      presets: [reactPreset]
+    })
+    const jsBlob = await createBlob(`const React = window.React\n${code}`)
+    const jsFile = file.replace('.jsx', '.js')
+    const jsPath = path.relative(process.cwd(), jsFile)
+    const cssSources = []
+    const { code: requireCode } = await babel.transformAsync(text, {
+      plugins: [{
+        visitor: {
+         ImportDeclaration(path){
+           if(path.node.source.value.endsWith('.css')){
+             path.remove()
+           }
+         }
+        }
+      }, commonjsPlugin],
       presets: [reactPreset]
     })
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
