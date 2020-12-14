@@ -64,14 +64,17 @@ import(\`./\${import.meta.url
       plugins: [{
         visitor: {
          ImportDeclaration(path){
+           console.log(path.node.source.value)
            if(path.node.source.value.endsWith('.css')){
              path.remove()
+             console.log('removed path')
            }
          }
         }
       }, commonjsPlugin],
       presets: [reactPreset]
     })
+    console.log(requireCode)
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
