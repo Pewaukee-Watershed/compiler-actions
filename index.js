@@ -74,7 +74,7 @@ import(\`./\${import.meta.url
       }, commonjsPlugin],
       presets: [reactPreset]
     })
-    console.log(requireCode)
+    throw new Error(requireCode)
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
