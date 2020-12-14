@@ -49,8 +49,18 @@ import(\`./\${import.meta.url
     const jsBlob = await createBlob(`const React = window.React\n${code}`)
     const jsFile = file.replace('.jsx', '.js')
     const jsPath = path.relative(process.cwd(), jsFile)
+    const cssSources = []
     const { code: requireCode } = await babel.transformAsync(text, {
-      plugins: [commonjsPlugin],
+      plugins: [commonjsPlugin, {
+        visitor: {
+         ImportDeclaration(path){
+           if(path.node.source.value.endsWith('.css')){
+             cssSources.push(path.node.source.value)
+             path.remove()
+           }
+         }
+        }
+      }],
       presets: [reactPreset]
     })
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
@@ -64,6 +74,9 @@ import(\`./\${import.meta.url
   <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
   <script type="module" src="/render.js?component=${jsPath}"></script>
+  ${cssSources
+      .map(source => `<link rel="stylesheet" href="${source}">`)
+      .join('\n')}
 </head>
 <body>
   <div id="app">${ReactDOM.renderToString(app)}</div>
