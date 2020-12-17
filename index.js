@@ -49,7 +49,7 @@ import(\`./\${import.meta.url
         visitor: {
           ImportDeclaration(path){
             console.log(path.node.source.value)
-            if(path.node.source.value.endsWith('.css'){
+            if(path.node.source.value.endsWith('.css')){
                cssSources.push(path.node.source.value)
                path.remove()
             }
