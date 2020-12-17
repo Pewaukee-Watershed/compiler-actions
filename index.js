@@ -48,7 +48,6 @@ import(\`./\${import.meta.url
       plugins: [{
         visitor: {
           ImportDeclaration(path){
-            console.log(path.node.source.value)
             if(path.node.source.value.endsWith('.css')){
                cssSources.push(path.node.source.value)
                path.remove()
@@ -59,7 +58,6 @@ import(\`./\${import.meta.url
       presets: [reactPreset],
       ast: true
     })
-    console.log(cssSources)
     const jsBlob = await createBlob(`const React = window.React\n${code}`)
     const jsFile = file.replace('.jsx', '.js')
     const jsPath = path.relative(process.cwd(), jsFile)
@@ -67,8 +65,6 @@ import(\`./\${import.meta.url
       plugins: [commonjsPlugin]
     })
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
-    console.log(code)
-    console.log(requireCode)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
     const app = React.createElement(App)
