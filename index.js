@@ -68,14 +68,14 @@ import(\`./\${import.meta.url
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
     const app = React.createElement(App)
-    const relativeJsPath = path.relative(path.dirname(jsFile), path.join(process.cwd(), 'render.js'))
+    const relativeRenderPath = path.relative(path.dirname(jsFile), path.join(process.cwd(), 'render.js'))
     const html = `
 <!DOCTYPE html>
 <html>
 <head>
   <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-  <script type="module" src="/render.js?component=${relativeJsPath}"></script>
+  <script type="module" src="${relativeRenderPath}?component=${jsPath}"></script>
   ${cssSources
       .map(source => `<link rel="stylesheet" href="${source}">`)
       .join('\n')}
