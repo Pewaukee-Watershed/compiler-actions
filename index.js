@@ -60,6 +60,7 @@ import(\`./\${import.meta.url
     const jsFile = file.replace('.jsx', '.js')
     const jsPath = path.relative(process.cwd(), jsFile)
     const cssSources = []
+    console.log('hello')
     const { code: requireCode } = await babel.transformAsync(text, {
       plugins: [{
         visitor: {
