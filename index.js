@@ -63,7 +63,7 @@ import(\`./\${import.meta.url
     const jsBlob = await createBlob(`const React = window.React\n${code}`)
     const jsFile = file.replace('.jsx', '.js')
     const jsPath = path.relative(process.cwd(), jsFile)
-    const { code: requireCode } = await babel.transformFromAstAsync(ast, {
+    const { code: requireCode } = await babel.transformFromAstAsync(ast, text, {
       plugins: [commonjsPlugin]
     })
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
