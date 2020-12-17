@@ -67,6 +67,8 @@ import(\`./\${import.meta.url
       plugins: [commonjsPlugin]
     })
     const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
+    console.log(code)
+    console.log(requireCode)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
     const app = React.createElement(App)
