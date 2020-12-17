@@ -42,8 +42,7 @@ import(\`./\${import.meta.url
   const renderBlob = await createBlob(renderFile)
   
   const blobs = await Promise.all(files.map(async file => {
-    const text = await fs.readFile(file, 'utf8')
-    text.replace(/import +(['"])[^\1]*\.css\1/g, '')
+    const text = (await fs.readFile(file, 'utf8')).replace(/import +(['"])[^\1]*\.css\1/g, '')
     const { code, ast } = await babel.transformAsync(text, {
       presets: [reactPreset],
       ast: true
