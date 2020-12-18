@@ -2,6 +2,8 @@ const core = require('@actions/core')
 const glob = require('@actions/glob')
 const github = require('@actions/github')
 const babel = require('@babel/core')
+const types = require('@babel/types')
+const { default: generate } = require('@babel/generator')
 const React = require('react')
 const ReactDOM = require('react-dom/server.js')
 const postCss = require('postcss')
@@ -42,18 +44,31 @@ export default {
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
     console.log(file)
     const inputCss = await fs.readFile(file, 'utf8')
+    let json
     const { css } = await postCss([postCssModules({
-      getJSON(cssFileName, json){
-        console.log(json)
+      getJSON(cssFileName, j){
+        json = j
       }
     })]).process(inputCss)
-    const cssPath = path.join(path.dirname(file), `${path.basename(file)}--css.json`)
-    await fs.writeFile(cssPath, css)
+    await fs.writeFile(file, css)
     const cssBlob = await createBlob(css)
+    const jsPath = path.join(path.dirname(file), `${path.basename(file)}--css.js`)
+    const { code } = generate(types.Program([
+      types.ExportDefaultDeclaration(types.ObjectExpression(Object.key(json).map(([k, v]) => types.ObjectProperty(
+        types.Identifier(k),
+        types.StringLiteral(v)
+      ))))
+    ]))
+    await fs.writeFile(jsPath, code)
+    const jsBlob = await createBlob(code)
     return {
       css: {
-        file: cssPath,
+        file: path.relative(cwd, file),
         sha: cssBlob.data.sha
+      },
+      js: {
+        file: path.relative(cwd, jsPath),
+        sha: jsBlob.data.sha
       }
     }
   }))
@@ -141,15 +156,23 @@ import(\`./\${import.meta.url
   const tree = await octokit.git.createTree({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tree: [{
-      path: 'render.js',
-      sha: renderBlob.data.sha,
-      mode: '100644'
-    }].concat(...jsBlobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
-      path: file,
-      sha: sha,
-      mode: '100644'
-    })))),
+    tree: [
+      {
+        path: 'render.js',
+        sha: renderBlob.data.sha,
+        mode: '100644'
+      },
+      ...jsBlobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
+        path: file,
+        sha: sha,
+        mode: '100644'
+      }))),
+      ...cssBlobs.map(({ css, js }) => [css, js].map(({ file, sha }) => ({
+        path: file,
+        sha: sha,
+        mode: '100644'
+      })))
+    ],
     base_tree: github.context.payload.head_commit.tree_id
   })
   const commit = await octokit.git.createCommit({
