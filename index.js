@@ -32,7 +32,14 @@ console.time('transform');
   const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
   const cssFiles = await cssGlobber.glob()
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
-    console.log(file) 
+    console.log(file)
+    const inputCss = await fs.readFile(file, 'utf8')
+    const { css } = await postCss([postCssModules({
+      getJSON(cssFileName, json){
+        console.log(json
+      }
+    })]).process(inputCss)
+    console.log(css)
   }))
   
   const jsGlobber = await glob.create(`**/*.jsx\n${noNodeModules}`)
