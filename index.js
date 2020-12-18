@@ -36,7 +36,7 @@ console.time('transform');
     const inputCss = await fs.readFile(file, 'utf8')
     const { css } = await postCss([postCssModules({
       getJSON(cssFileName, json){
-        console.log(json
+        console.log(json)
       }
     })]).process(inputCss)
     console.log(css)
