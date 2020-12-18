@@ -43,18 +43,23 @@ console.time('transform');
       }
     })]).process(inputCss)
     const fileName = path.basename(file, '.css')
-    const cssPath = path.join(path.dirname(file), `${fileName}--css-module.css`)
+    const fileDir = path.dirname(file)
+    const cssPath = path.join(fileDir, `${fileName}--css-module.css`)
     await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
-    const jsPath = path.join(path.dirname(file), `${fileName}--css-module.js`)
+    const jsPath = path.join(fileDir, `${fileName}--css-module.js`)
     console.log(jsPath)
-    const { code } = generate(types.Program([
+    const ast = types.Program([
       types.ExportDefaultDeclaration(types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
         types.Identifier(k),
         types.StringLiteral(v)
       ))))
-    ]))
+    ])
+    const { code } = generate(ast)
     await fs.writeFile(jsPath, code)
+    const requirePath = path.join(fileDir, `${fileName}--css-module.cjs`)
+    const { code: requireCode } = await babel.transformFromAstAsync(ast, '', { plugins: [commonjsPluggin] })
+    await fs.writeFile(requirePath, requireCode)
     const jsBlob = await createBlob(code)
     return {
       css: {
@@ -112,7 +117,15 @@ import(\`./\${import.meta.url
     const jsBlob = await createBlob(`const React = window.React\n${code}`)
     const jsPath = path.relative(cwd, jsFile)
     const { code: requireCode } = await babel.transformFromAstAsync(ast, text, {
-      plugins: [commonjsPlugin]
+      plugins: [{
+        visitor: {
+          ImportDeclaration({ node: { source } }){
+            if(source.value.endsWith('--css-module.js')){
+              source.value = source.value.replace('--css-module.js', '--css-module.cjs')
+            }
+          }
+        }
+      }, commonjsPlugin]
     })
     const relativeReactPath = path.relative(jsDir, reactPath)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
