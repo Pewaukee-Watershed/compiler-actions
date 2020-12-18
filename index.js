@@ -34,7 +34,6 @@ console.time('transform');
   const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
   const cssFiles = await cssGlobber.glob()
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
-    console.log(file)
     const inputCss = await fs.readFile(file, 'utf8')
     let json
     const { css } = await postCss([postCssModules({
@@ -48,7 +47,6 @@ console.time('transform');
     await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
     const jsPath = path.join(fileDir, `${fileName}--css-module.js`)
-    console.log(jsPath)
     const ast = types.Program([
       types.ExportDefaultDeclaration(types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
         types.Identifier(k),
@@ -59,6 +57,7 @@ console.time('transform');
     await fs.writeFile(jsPath, code)
     const requirePath = path.join(fileDir, `${fileName}--css-module.cjs`)
     const { code: requireCode } = await babel.transformFromAstAsync(ast, '', { plugins: [commonjsPlugin] })
+    console.log(requireCode)
     await fs.writeFile(requirePath, requireCode)
     const jsBlob = await createBlob(code)
     return {
