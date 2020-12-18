@@ -29,6 +29,14 @@ console.time('transform');
   
   const noNodeModules = '!**/node_modules'
   
+  console.log(babel.parse(`
+export default {
+  content: '_content_gzxrw_32',
+  grid: '_grid_gzxrw_43'
+}
+`
+  ))
+  
   const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
   const cssFiles = await cssGlobber.glob()
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
@@ -39,7 +47,15 @@ console.time('transform');
         console.log(json)
       }
     })]).process(inputCss)
-    console.log(css)
+    const cssPath = path.join(path.dirname(file), `${path.basename(file)}--css.json`)
+    await fs.writeFile(cssPath, css)
+    const cssBlob = await createBlob(css)
+    return {
+      css: {
+        file: cssPath,
+        sha: cssBlob.data.sha
+      }
+    }
   }))
   
   const jsGlobber = await glob.create(`**/*.jsx\n${noNodeModules}`)
