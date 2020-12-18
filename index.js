@@ -31,14 +31,6 @@ console.time('transform');
   
   const noNodeModules = '!**/node_modules'
   
-  console.log(babel.parse(`
-export default {
-  content: '_content_gzxrw_32',
-  grid: '_grid_gzxrw_43'
-}
-`
-  ))
-  
   const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
   const cssFiles = await cssGlobber.glob()
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
@@ -50,9 +42,10 @@ export default {
         json = j
       }
     })]).process(inputCss)
-    await fs.writeFile(file, css)
+    const cssPath = path.join(path.dirname(file), `${path.basename(file)}--css-module.css`)
+    await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
-    const jsPath = path.join(path.dirname(file), `${path.basename(file)}--css.js`)
+    const jsPath = path.join(path.dirname(file), `${path.basename(file)}--css-module.js`)
     const { code } = generate(types.Program([
       types.ExportDefaultDeclaration(types.ObjectExpression(Object.key(json).map(([k, v]) => types.ObjectProperty(
         types.Identifier(k),
@@ -63,7 +56,7 @@ export default {
     const jsBlob = await createBlob(code)
     return {
       css: {
-        file: path.relative(cwd, file),
+        file: path.relative(cwd, cssPath),
         sha: cssBlob.data.sha
       },
       js: {
@@ -102,7 +95,7 @@ import(\`./\${import.meta.url
             if(p.node.source.value.endsWith('.css')){
               const cssFile = path.join(jsDir, p.node.source.value)
               if(cssFile.startsWith(cwd)){
-                p.node.source.value = p.node.source.value.split('.css')[0] + '--css.js'
+                p.node.source.value = p.node.source.value.split('.css')[0] + '--css-module.js'
               }else{
                 p.remove()
               }
