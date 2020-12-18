@@ -56,8 +56,8 @@ import(\`./\${import.meta.url
             if(p.node.source.value.endsWith('.css')){
               const cssFile = path.join(jsDir, p.node.source.value)
               if(cssFile.startsWith(cwd)){
-                console.log(p.node.source.value, p.node.source.value.split('.'))
-                p.node.source.value = p.node.source.value.split('.')[0] + '--css.js'
+                console.log(p.node.source.value, p.node.source.value.split('.css'))
+                p.node.source.value = p.node.source.value.split('.css')[0] + '--css.js'
               }else{
                 p.remove()
               }
