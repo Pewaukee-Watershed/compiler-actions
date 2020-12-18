@@ -52,15 +52,15 @@ import(\`./\${import.meta.url
     const { code, ast } = await babel.transformAsync(text, {
       plugins: [{
         visitor: {
-          ImportDeclaration(path){
-            if(path.node.source.value.endsWith('.css')){
-              const cssFile = path.join(jsDir, path.node.source.value)
+          ImportDeclaration(p){
+            if(p.node.source.value.endsWith('.css')){
+              const cssFile = path.join(jsDir, p.node.source.value)
               if(cssFile.startsWith(cwd)){
-                path.node.source.value = path.node.source.value.split('.')[0] + '--css.js'
+                p.node.source.value = p.node.source.value.split('.')[0] + '--css.js'
               }else{
-                path.remove()
+                p.remove()
               }
-              cssSources.push(path.node.source.value)
+              cssSources.push(p.node.source.value)
             }
           }
         }
