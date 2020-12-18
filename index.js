@@ -27,8 +27,16 @@ console.time('transform');
   const reactPreset = babel.createConfigItem(require('@babel/preset-react'), { type: 'preset' })
   const commonjsPlugin = babel.createConfigItem(require('@babel/plugin-transform-modules-commonjs'), { type: 'plugin' })
   
-  const globber = await glob.create('**/*.jsx\n!**/node_modules')
-  const files = await globber.glob()
+  const noNodeModules = '!**/node_modules'
+  
+  const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
+  const cssFiles = await cssGlobber.glob()
+  const cssBlobs = await Promise.all(cssFiles.map(async file => {
+    console.log(file) 
+  }))
+  
+  const jsGlobber = await glob.create(`**/*.jsx\n${noNodeModules}`)
+  const jsFiles = await jsGlobber.glob()
   
   const renderFile = `
 import(\`./\${import.meta.url
@@ -44,7 +52,7 @@ import(\`./\${import.meta.url
 `
   const renderBlob = await createBlob(renderFile)
   
-  const blobs = await Promise.all(files.map(async file => {
+  const jsBlobs = await Promise.all(jsFiles.map(async file => {
     const text = await fs.readFile(file, 'utf8')
     const jsFile = file.replace('.jsx', '.js')
     const jsDir = path.dirname(jsFile)
@@ -56,7 +64,6 @@ import(\`./\${import.meta.url
             if(p.node.source.value.endsWith('.css')){
               const cssFile = path.join(jsDir, p.node.source.value)
               if(cssFile.startsWith(cwd)){
-                console.log(p.node.source.value, p.node.source.value.split('.css'))
                 p.node.source.value = p.node.source.value.split('.css')[0] + '--css.js'
               }else{
                 p.remove()
@@ -115,7 +122,7 @@ import(\`./\${import.meta.url
       path: 'render.js',
       sha: renderBlob.data.sha,
       mode: '100644'
-    }].concat(...blobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
+    }].concat(...jsBlobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
       path: file,
       sha: sha,
       mode: '100644'
