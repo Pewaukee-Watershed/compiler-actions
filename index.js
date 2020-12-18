@@ -46,6 +46,7 @@ console.time('transform');
     await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
     const jsPath = path.join(path.dirname(file), `${path.basename(file)}--css-module.js`)
+    console.log(jsPath)
     const { code } = generate(types.Program([
       types.ExportDefaultDeclaration(types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
         types.Identifier(k),
