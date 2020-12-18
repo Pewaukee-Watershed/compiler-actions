@@ -57,9 +57,10 @@ import(\`./\${import.meta.url
               const cssFile = path.join(jsDir, path.node.source.value)
               if(cssFile.startsWith(cwd)){
                 path.node.source.value = path.node.source.value.split('.')[0] + '--css.js'
+              }else{
+                path.remove()
               }
               cssSources.push(path.node.source.value)
-              path.remove()
             }
           }
         }
