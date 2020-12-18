@@ -4,12 +4,15 @@ const github = require('@actions/github')
 const babel = require('@babel/core')
 const React = require('react')
 const ReactDOM = require('react-dom/server.js')
+const postCss = require('postcss')
+const postCssModules = require('postcss-modules')
 const fs = require('fs').promises
 const path = require('path')
 
 console.log('Finding Files')
 console.time('transform');
 (async () => {
+  const cwd = process.cwd()
   const reactPath = require.resolve('react')
   
   const createBlob = async text => await octokit.git.createBlob({
@@ -43,14 +46,20 @@ import(\`./\${import.meta.url
   
   const blobs = await Promise.all(files.map(async file => {
     const text = await fs.readFile(file, 'utf8')
+    const jsFile = file.replace('.jsx', '.js')
+    const jsDir = path.dirname(jsFile)
     const cssSources = []
     const { code, ast } = await babel.transformAsync(text, {
       plugins: [{
         visitor: {
           ImportDeclaration(path){
             if(path.node.source.value.endsWith('.css')){
-               cssSources.push(path.node.source.value)
-               path.remove()
+              const cssFile = path.join(jsDir, path.node.source.value)
+              if(cssFile.startsWith(cwd)){
+                path.node.source.value = path.node.source.value.split('.')[0] + '--css.js'
+              }
+              cssSources.push(path.node.source.value)
+              path.remove()
             }
           }
         }
@@ -59,16 +68,15 @@ import(\`./\${import.meta.url
       ast: true
     })
     const jsBlob = await createBlob(`const React = window.React\n${code}`)
-    const jsFile = file.replace('.jsx', '.js')
-    const jsPath = path.relative(process.cwd(), jsFile)
+    const jsPath = path.relative(cwd, jsFile)
     const { code: requireCode } = await babel.transformFromAstAsync(ast, text, {
       plugins: [commonjsPlugin]
     })
-    const relativeReactPath = path.relative(path.dirname(jsFile), reactPath)
+    const relativeReactPath = path.relative(jsDir, reactPath)
     await fs.writeFile(jsFile, `const React = require('${relativeReactPath}')\n${requireCode}`)
     const { default: App } = require(jsFile)
     const app = React.createElement(App)
-    const relativeRenderPath = path.relative(path.dirname(jsFile), path.join(process.cwd(), 'render.js'))
+    const relativeRenderPath = path.relative(jsDir, path.join(cwd, 'render.js'))
     const html = `
 <!DOCTYPE html>
 <html>
@@ -93,7 +101,7 @@ import(\`./\${import.meta.url
         sha: jsBlob.data.sha
       },
       html: {
-        file: path.relative(process.cwd(), htmlFile),
+        file: path.relative(cwd, htmlFile),
         sha: htmlBlob.data.sha
       }
     }
