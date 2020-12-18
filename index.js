@@ -42,7 +42,7 @@ console.time('transform');
         json = j
       }
     })]).process(inputCss)
-    const fileName = path.baseName(file, '.css')
+    const fileName = path.basename(file, '.css')
     const cssPath = path.join(path.dirname(file), `${fileName}--css-module.css`)
     await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
