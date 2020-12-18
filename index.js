@@ -58,7 +58,7 @@ console.time('transform');
     const { code } = generate(ast)
     await fs.writeFile(jsPath, code)
     const requirePath = path.join(fileDir, `${fileName}--css-module.cjs`)
-    const { code: requireCode } = await babel.transformFromAstAsync(ast, '', { plugins: [commonjsPluggin] })
+    const { code: requireCode } = await babel.transformFromAstAsync(ast, '', { plugins: [commonjsPlugin] })
     await fs.writeFile(requirePath, requireCode)
     const jsBlob = await createBlob(code)
     return {
