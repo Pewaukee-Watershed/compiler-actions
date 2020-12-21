@@ -47,16 +47,20 @@ console.time('transform');
     await fs.writeFile(cssPath, css)
     const cssBlob = await createBlob(css)
     const jsPath = path.join(fileDir, `${fileName}--css-module.js`)
-    const ast = types.Program([
-      types.ExportDefaultDeclaration(types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
+    const ast = types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
         types.Identifier(k),
         types.StringLiteral(v)
-      ))))
-    ])
-    const { code } = generate(ast)
+      )))
+    const esmAst = types.Program([types.ExportDefaultDeclaration(ast)])
+    const { code } = generate(esmAst)
     await fs.writeFile(jsPath, code)
     const requirePath = path.join(fileDir, `${fileName}--css-module.cjs`)
-    const { code: requireCode } = await babel.transformFromAstAsync(ast, code, { plugins: [commonjsPlugin] })
+    const cjsAst = types.Program([types.ExpressionStatement(types.assignmentExpression(
+      '=',
+      types.memberExpression(types.Identifier('module'), types.Identifier('exports')),
+      ast
+    ))])
+    const { code: requireCode } = generate(cjsAst)
     console.log(requireCode)
     await fs.writeFile(requirePath, requireCode)
     const jsBlob = await createBlob(code)
