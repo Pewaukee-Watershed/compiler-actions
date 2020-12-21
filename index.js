@@ -153,7 +153,7 @@ import(\`./\${import.meta.url
   <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
   <script type="module" src="${relativeRenderPath}?component=${jsPath}"></script>
   ${cssSources
-      .map(source => `<link rel="stylesheet" href="${source}">`)
+      .map(source => `<link rel="stylesheet" href="${source.replace('--css-module.js', '--css-module.css')}">`)
       .join('\n')}
 </head>
 <body>
