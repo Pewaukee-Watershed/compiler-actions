@@ -54,6 +54,7 @@ console.time('transform');
     const esmAst = types.Program([types.ExportDefaultDeclaration(ast)])
     const { code } = generate(esmAst)
     await fs.writeFile(jsPath, code)
+    const jsBlob = await createBlob(code)
     const requirePath = path.join(fileDir, `${fileName}--css-module.cjs`)
     const cjsAst = types.Program([types.ExpressionStatement(types.assignmentExpression(
       '=',
@@ -63,7 +64,16 @@ console.time('transform');
     const { code: requireCode } = generate(cjsAst)
     console.log(requireCode)
     await fs.writeFile(requirePath, requireCode)
-    const jsBlob = await createBlob(code)
+    console.log({
+      css: {
+        file: path.relative(cwd, cssPath),
+        sha: cssBlob.data.sha
+      },
+      js: {
+        file: path.relative(cwd, jsPath),
+        sha: jsBlob.data.sha
+      }
+    })
     return {
       css: {
         file: path.relative(cwd, cssPath),
