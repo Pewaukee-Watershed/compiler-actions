@@ -174,10 +174,7 @@ import(\`./\${import.meta.url
       }
     }
   }))
-  console.log({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    tree: [
+  console.log([
       {
         path: 'render.js',
         sha: renderBlob.data.sha,
@@ -193,9 +190,7 @@ import(\`./\${import.meta.url
         sha: sha,
         mode: '100644'
       })))
-    ],
-    base_tree: github.context.payload.head_commit.tree_id
-  })
+    ])
   const tree = await octokit.git.createTree({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
