@@ -48,7 +48,7 @@ console.time('transform');
     const cssBlob = await createBlob(css)
     const jsPath = path.join(fileDir, `${fileName}--css-module.js`)
     const ast = types.ObjectExpression(Object.entries(json).map(([k, v]) => types.ObjectProperty(
-        types.Identifier(k),
+        k.includes('-') ? types.StringLiteral(k) : types.Identifier(k),
         types.StringLiteral(v)
       )))
     const esmAst = types.Program([types.ExportDefaultDeclaration(ast)])
