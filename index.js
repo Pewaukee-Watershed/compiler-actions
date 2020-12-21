@@ -31,7 +31,7 @@ console.time('transform');
   
   const noNodeModules = '!**/node_modules'
   
-  const cssGlobber = await glob.create(`**/*.css\n${noNodeModules}`)
+  const cssGlobber = await glob.create(`**/*.css\n!**/*--css-module.css\n${noNodeModules}`)
   const cssFiles = await cssGlobber.glob()
   const cssBlobs = await Promise.all(cssFiles.map(async file => {
     const inputCss = await fs.readFile(file, 'utf8')
