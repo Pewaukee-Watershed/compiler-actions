@@ -174,32 +174,14 @@ import(\`./\${import.meta.url
       }
     }
   }))
-  console.log([
-      {
-        path: 'render.js',
-        sha: renderBlob.data.sha,
-        mode: '100644'
-      },
-      ...jsBlobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
-        path: file,
-        sha: sha,
-        mode: '100644'
-      }))),
-      ...cssBlobs.map(({ css, js }) => [css, js].map(({ file, sha }) => ({
-        path: file,
-        sha: sha,
-        mode: '100644'
-      })))
-    ])
   const tree = await octokit.git.createTree({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tree: [
-      {
+    tree: [{
         path: 'render.js',
         sha: renderBlob.data.sha,
         mode: '100644'
-      },
+      }].concat(
       ...jsBlobs.map(({ js, html }) => [js, html].map(({ file, sha }) => ({
         path: file,
         sha: sha,
@@ -210,7 +192,7 @@ import(\`./\${import.meta.url
         sha: sha,
         mode: '100644'
       })))
-    ],
+    ),
     base_tree: github.context.payload.head_commit.tree_id
   })
   const commit = await octokit.git.createCommit({
