@@ -40,7 +40,7 @@ console.time('transform');
       getJSON(cssFileName, j){
         json = j
       }
-    })]).process(inputCss)
+    })]).process(inputCss, { from: path.basename(file) })
     const fileName = path.basename(file, '.css')
     const fileDir = path.dirname(file)
     const cssPath = path.join(fileDir, `${fileName}--css-module.css`)
