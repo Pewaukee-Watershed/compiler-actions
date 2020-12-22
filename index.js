@@ -62,18 +62,7 @@ console.time('transform');
       ast
     ))])
     const { code: requireCode } = generate(cjsAst)
-    console.log(requireCode)
     await fs.writeFile(requirePath, requireCode)
-    console.log({
-      css: {
-        file: path.relative(cwd, cssPath),
-        sha: cssBlob.data.sha
-      },
-      js: {
-        file: path.relative(cwd, jsPath),
-        sha: jsBlob.data.sha
-      }
-    })
     return {
       css: {
         file: path.relative(cwd, cssPath),
